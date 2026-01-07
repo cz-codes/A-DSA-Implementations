@@ -1,4 +1,4 @@
-.out
+*.out
 *.o *.exe *.out *.dll *.so
 build/ bin/ cmake-build*/
 .vscode/ .idea/
