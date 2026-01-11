@@ -1,5 +1,4 @@
-//FIX free_table() - invalid pointer error
-//Address qns on line 77
+//Check for edge cases.
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -7,7 +6,7 @@
 
 #define PRIME 509
 #define TABLE_SIZE 100
-#define MAXLOOP 50
+#define MAXLOOP 200
 
 //Structures
 typedef struct {
@@ -30,10 +29,9 @@ HashValues h2;
 
 //Functions
 void free_table(NullableInt *Table){
-    for(int i=0;i<TABLE_SIZE;i++){
-        free(&Table[i]);
-    }
+   
     free(Table);
+    Table = NULL;
 }
 void generate_constants(HashValues *h){
     srand(time(NULL));
@@ -45,6 +43,7 @@ void generate_constants(HashValues *h){
 size_t compute_hash(int a, int b, int key){
     return ( ( ( a * key ) + b ) % PRIME ) % TABLE_SIZE;
 }
+
 
 size_t hash(int key, HashValues *h){
     return compute_hash(h->a,h->b,key);
@@ -76,20 +75,8 @@ void rehash(){
 
     for(int i=0;i<=j;i++){
         int element = temp_Table[i];
-
-        // size_t index = hash(element,&h2);
-        // Table2[index].value = element;
-        // Table2[index].has_value = 1;
-        //QNS:
-        //What if two values collide here, when hasing with the new hash fuction
-        //do we take the key , now evicted and out after maxloop in (insertion) and insert it as last element in temp_table?,then hash it in too
-        // or do we just generate_constants for both tables and hash everykey back in
-        //or do we call insert on every key in  the temp_table, after ofcourse - generate_constant(&h2);
-
         insert(element);
-    }
- 
-    
+    }    
 }
 
 int insert(int key){
@@ -161,9 +148,27 @@ void print_cuckoo(){
 
 void main(){
     init();
-    for(int i=0;i<100;i++){
+    for(int i=0;i<10;i++){
         insert(i);
     }
     print_cuckoo();
     
 }
+
+
+///TEMP NOTES
+ // size_t index = hash(element,&h2);
+        // Table2[index].value = element;
+        // Table2[index].has_value = 1;
+        //QNS:
+        //What if two values collide here, when hasing with the new hash fuction
+        //do we take the key , now evicted and out after maxloop in (insertion) and insert it as last element in temp_table?,then hash it in too
+        // or do we just generate_constants for *both* tables and hash everykey back in(q1)
+        //or do we call insert on every key in  the temp_table, after ofcourse - generate_constant(&h2);
+        //Currently there is no use for temp_array here.
+    //Possible ways to hash the keys back with new  a and b hash2 include:
+    //create a struct for temp array with an array and size , and return that to insert from rehash
+    //so that we know how many iterations to loop and hash into array 2.
+    //2.call insert for each element as the same as here
+    //is creating a struct just for rehash a good option?
+    //well doess it work , yes then why not
