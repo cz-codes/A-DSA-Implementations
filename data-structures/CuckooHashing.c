@@ -1,4 +1,5 @@
-// Check for edge cases.
+// Check edge cases
+//Implement MAX REHASH count, which if hit, resizes table
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,15 +30,14 @@ HashValues h1;
 HashValues h2;
 
 // Functions
-void free_table(NullableInt *Table)
+void free_table(NullableInt **Table)
 {
-    free(Table);
-    Table = NULL;
+    free(*Table);
+    *Table = NULL;
 }
 
 void generate_constants(HashValues *h)
 {
-    srand(time(NULL));
     h->a = (rand() % (PRIME - 1)) + 1;
     h->b = (rand() % (PRIME - 1));
     return;
@@ -68,7 +68,8 @@ int lookup(int key)
 
 void rehash()
 {
-    int *temp_Table = calloc(TABLE_SIZE, sizeof(int));
+    //copy values in both tables to temp_table
+    int *temp_Table = calloc(TABLE_SIZE*2, sizeof(int));
     int j = 0;
     for (int i = 0; i < TABLE_SIZE; i++)
     {
@@ -77,15 +78,29 @@ void rehash()
             temp_Table[j++] = Table2[i].value;
         }
     }
+    for (int i = 0; i < TABLE_SIZE; i++)
+    {
+        if (Table1[i].has_value)
+        {
+            temp_Table[j++] = Table1[i].value;
+        }
+    }
+    //generate new hash constants
+    generate_constants(&h1);
     generate_constants(&h2);
-    free_table(Table2);
+    //free current and allocate new memory to tables
+    free_table(&Table1);
+    free_table(&Table2);
+    Table1 = calloc(TABLE_SIZE, sizeof(NullableInt));
     Table2 = calloc(TABLE_SIZE, sizeof(NullableInt));
-
-    for (int i = 0; i <= j; i++)
+    //reinsert 
+    for (int i = 0; i < j; i++)
     {
         int element = temp_Table[i];
         insert(element);
     }
+
+    free(temp_Table);
 }
 
 int insert(int key)
@@ -116,7 +131,7 @@ int insert(int key)
         size_t i2 = hash(key, &h2);
         if (Table2[i2].has_value)
         {
-            int evicted = Table1[i1].value;
+            int evicted = Table2[i2].value;
             Table2[i2].value = key;
             key = evicted;
         }
@@ -139,6 +154,7 @@ void init()
 {
     Table1 = calloc(TABLE_SIZE, sizeof(NullableInt));
     Table2 = calloc(TABLE_SIZE, sizeof(NullableInt));
+    srand(time(NULL)); // seed once - for rand function
     generate_constants(&h1);
     generate_constants(&h2);
 }
@@ -170,7 +186,7 @@ void print_cuckoo()
 void main()
 {
     init();
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 100; i++)
     {
         insert(i);
     }
