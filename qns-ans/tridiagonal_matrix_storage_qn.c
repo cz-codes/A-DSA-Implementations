@@ -26,12 +26,29 @@ Algorithm:
 because the difference between the row and column index of an element within the diagonal band,
 is always one or 0 or -1.The mid term of the diagonal band of a row always has index, row=col
 */
-#include<cstddef>
-
+#include<stdio.h>
+#include<stdlib.h>
 int value_at(int row, int col, int* b){
     int offset = col - row;
-    if(abs(offset) =< 1){
-        return b[i + offset]
+    if(abs(offset) <=1){
+        return b[row + offset];
     }
     return 0;
+}
+
+void set_value(int row, int col, int* b,int value){
+    int offset = col - row;
+    if(abs(offset) <= 1){
+        b[row + offset] = value;
+    }
+}
+
+void main(){
+    int b[100];
+    int value = 10;
+    set_value(2,2,b,value);
+    
+    int retrived  = value_at(2,2,b);
+    printf("Retrived Value: %d\n",retrived);
+
 }
