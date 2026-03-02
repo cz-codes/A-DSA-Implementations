@@ -1,14 +1,11 @@
-//Trie Data Structure
 #include <iostream>
+#include <string>
 using namespace std;
 
-// Node structure for Trie
 class TrieNode {
 public:
     TrieNode* children[26];
     bool isLeaf;
-
-    // Initialize Trie node
     TrieNode() {
         for (int i = 0; i < 26; i++)
             children[i] = nullptr;
@@ -16,17 +13,11 @@ public:
     }
 };
 
-// Trie data structure implementation
 class Trie {
     TrieNode* root;
-
 public:
-    // Initialize Trie with root node
-    Trie() {
-        root = new TrieNode();
-    }
+    Trie() { root = new TrieNode(); }
 
-    // Insert a word into the Trie
     void insert(string key) {
         TrieNode* curr = root;
         for (char c : key) {
@@ -38,47 +29,60 @@ public:
         curr->isLeaf = true;
     }
 
-    // Search for a complete word in the Trie
-    bool search(string key) {
+    // Returns the full word if prefix matches, else ""
+    string findWord(string prefix) {
         TrieNode* curr = root;
-        for (char c : key) {
-            int index = c - 'a';
-            if (curr->children[index] == nullptr)
-                return false;
-            curr = curr->children[index];
-        }
-        return curr->isLeaf;
-    }
+        string result = prefix;
 
-    // Check if a prefix exists in the Trie
-    bool isPrefix(string prefix) {
-        TrieNode* curr = root;
         for (char c : prefix) {
             int index = c - 'a';
             if (curr->children[index] == nullptr)
-                return false;
+                return "";
             curr = curr->children[index];
         }
-        return true;
+
+        // If exact word, return it
+        if (curr->isLeaf) return result;
+
+        // Try to complete the prefix to a word
+        while (!curr->isLeaf) {
+            bool found = false;
+            for (int i = 0; i < 26; i++) {
+                if (curr->children[i] != nullptr) {
+                    result += (char)('a' + i);
+                    curr = curr->children[i];
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return "";
+        }
+
+        return result;
     }
 };
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " word1 word2 ..." << endl;
+        return 1;
+    }
+
     Trie trie;
-    string arr[] = {"test", "elephant", "cat", "mouse"};
+    for (int i = 1; i < argc; i++)
+        trie.insert(string(argv[i]));
 
-    for (string s : arr)
-        trie.insert(s);
+    string query;
+    while (true) {
+        cout << "Search: ";
+        if (!getline(cin, query)) break;
 
-    string searchKeys[] = {"test", "ghee", "cat"};
-    for (string s : searchKeys)
-        cout << (trie.search(s) ? "true " : "false ");
+        string result = trie.findWord(query);
+        if (result != "")
+            cout << "Found: " << result << endl;
+        else
+            cout << "No match found" << endl;
+    }
 
-    cout << endl;
-
-    string prefixKeys[] = {"tes", "mo", "ele", "de"};
-    for (string s : prefixKeys)
-        cout << (trie.isPrefix(s) ? "true " : "false ");
-    cout << endl;
     return 0;
 }
